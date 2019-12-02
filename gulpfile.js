@@ -6,6 +6,7 @@ const inject = require("gulp-inject-string");
 const fs = require("fs");
 const util = require("util");
 const mustache = require("mustache");
+const replace = require("gulp-replace");
 
 const readFile = util.promisify(fs.readFile);
 
@@ -35,10 +36,30 @@ async function loadReadmeTemplate() {
   }
 }
 
+gulp.task("copy:worker:encrypt", () => {
+  return gulp.src("./src/crypto/EncryptBodyWorker.js").pipe(gulp.dest("./lib/crypto"));
+});
+
+gulp.task("copy:worker:decrypt", () => {
+  return gulp.src("./src/crypto/DecryptBodyWorker.js").pipe(gulp.dest("./lib/crypto"));
+});
+
 gulp.task("compile:hard", () => {
   return gulp
     .src("./lib/**/*.js", { base: "./" })
     .pipe(debug())
+    .pipe(
+      replace(
+        "./src/crypto/EncryptBodyWorker.js",
+        "./node_modules/@symlinkde/eco-os-pk-crypt/lib/crypto/EncryptBodyWorker.js"
+      )
+    )
+    .pipe(
+      replace(
+        "./src/crypto/DecryptBodyWorker.js",
+        "./node_modules/@symlinkde/eco-os-pk-crypt/lib/crypto/DecryptBodyWorker.js"
+      )
+    )
     .pipe(
       flatMap(function(stream, file) {
         return stream.pipe(
@@ -47,10 +68,10 @@ gulp.task("compile:hard", () => {
             warning_level: "DEFAULT",
             language_in: "ECMASCRIPT6_STRICT",
             language_out: "ECMASCRIPT5_STRICT",
-            js_output_file: file.path,
-          }),
+            js_output_file: file.path
+          })
         );
-      }),
+      })
     )
     .pipe(gulp.dest("."));
 });
@@ -69,7 +90,7 @@ gulp.task("build:readme", async () => {
   const template = await loadReadmeTemplate();
   const renderedTemplate = await mustache.render(template.toString(), {
     name: package.name,
-    description: package.description,
+    description: package.description
   });
   fs.writeFile("readme.md", renderedTemplate, "utf-8", (err) => {
     if (err) {
