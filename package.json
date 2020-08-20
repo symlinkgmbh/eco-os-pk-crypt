@@ -14,7 +14,7 @@
     "build": "yarn clean && yarn tsc && yarn run gulp copy:worker:decrypt && yarn run gulp copy:worker:encrypt && yarn gulp compile:hard && yarn gulp inject:license"
   },
   "dependencies": {
-    "bcrypt": "3.0.7",
+    "bcrypt": "5.0.0",
     "js-sha3": "0.8.0",
     "jsonwebtoken": "8.5.1",
     "node-forge": "0.9.1",
